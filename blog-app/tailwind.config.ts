@@ -9,7 +9,12 @@ export default {
   ],
   theme: {
     extend: {
+      boxShadow: {
+        200: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        300: "0 6px 8px rgba(0, 0, 0, 0.15)",
+      },
       colors: {
+        "black-300": "#474747",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -17,6 +22,7 @@ export default {
         "primary-100": "#f6d882",
         "black-100": "#1a1a1a",
         "white-100": "#ffffff",
+        "black-200": "#333333", // Replace with your desired color
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -64,5 +70,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [],
 } satisfies Config;
