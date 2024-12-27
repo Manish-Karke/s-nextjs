@@ -208,7 +208,7 @@ export type Startup_queryResult = Array<{
   } | null;
 }>;
 // Variable: startup_query_by_slug
-// Query: *[_type==  "startup" && _id==$id][0]{  _id,    title,    slug,    _createdAt,category,image,views,description,    author->{      _id,name,image,bio    },    pitch,  }
+// Query: *[_type == "startup" && _id == $id][0]{    _id,    title,    slug,    _createdAt,    category,    image,    views,    description,    author->{      _id,      name,      image,      bio    },    pitch,  }
 export type Startup_query_by_slugResult = {
   _id: string;
   title: string | null;
@@ -226,12 +226,19 @@ export type Startup_query_by_slugResult = {
   } | null;
   pitch: string | null;
 } | null;
+// Variable: startup_views_query
+// Query: *[_type == "startup" && _id == $id][0]{    _id,    views,  }
+export type Startup_views_queryResult = {
+  _id: string;
+  views: null;
+} | null;
 
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     "\n  *[_type == \"startup\" && defined(slug.current) && !defined($search) || category match $search|| title match $search || author->name match $search]|order(_createdAt desc){\n    _id,\n    title,\n    slug,\n    _createdAt,\n    category,\n    image,views,description,\n    author->{\n      _id,\n      name,\n      image,\n      bio\n    }\n  }\n": Startup_queryResult;
-    "*[_type==\n  \"startup\" && _id==$id][0]{\n  _id,\n    title,\n    slug,\n    _createdAt,category,image,views,description,\n    author->{\n      _id,name,image,bio\n    },\n    pitch,\n  }\n": Startup_query_by_slugResult;
+    "\n  *[_type == \"startup\" && _id == $id][0]{\n    _id,\n    title,\n    slug,\n    _createdAt,\n    category,\n    image,\n    views,\n    description,\n    author->{\n      _id,\n      name,\n      image,\n      bio\n    },\n    pitch,\n  }\n": Startup_query_by_slugResult;
+    "\n  *[_type == \"startup\" && _id == $id][0]{\n    _id,\n    views,\n  }\n": Startup_views_queryResult;
   }
 }

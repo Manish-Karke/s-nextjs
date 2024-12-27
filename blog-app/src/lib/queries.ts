@@ -17,15 +17,29 @@ export const startup_query = defineQuery(`
   }
 `);
 
-export const startup_query_by_slug = defineQuery(`*[_type==
-  "startup" && _id==$id][0]{
-  _id,
+export const startup_query_by_slug = defineQuery(`
+  *[_type == "startup" && _id == $id][0]{
+    _id,
     title,
     slug,
-    _createdAt,category,image,views,description,
+    _createdAt,
+    category,
+    image,
+    views,
+    description,
     author->{
-      _id,name,image,bio
+      _id,
+      name,
+      image,
+      bio
     },
     pitch,
+  }
+`);
+
+export const startup_views_query = defineQuery(`
+  *[_type == "startup" && _id == $id][0]{
+    _id,
+    views,
   }
 `);
