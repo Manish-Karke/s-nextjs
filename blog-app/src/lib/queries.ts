@@ -43,3 +43,13 @@ export const startup_views_query = defineQuery(`
     views,
   }
 `);
+
+export const Author_query_by_Github_id = defineQuery(`
+  *[_type == "author" && _id == $id][0]{
+    _id,
+    id,
+    name,
+    image,
+    bio,
+    username,}
+  `);
