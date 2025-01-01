@@ -1,22 +1,21 @@
-import React from "react";
 import StartUpForm from "../../../../components/startUpForm";
-import { redirect } from "next/dist/server/api-utils";
-
 import { auth } from "../../../../../auth";
+import { redirect } from "next/navigation";
 
-const page = async () => {
+const Page = async () => {
   const session = await auth();
 
-  if (!session) redirect("/"); // Corrected syntax
+  if (!session) redirect("/");
 
   return (
-    <div>
+    <>
       <section className="pink_container !min-h-[230px]">
-        <h1 className="heading">Submit AI ideas</h1>
+        <h1 className="heading">Submit Your Startup</h1>
       </section>
+
       <StartUpForm />
-    </div>
+    </>
   );
 };
 
-export default page;
+export default Page;

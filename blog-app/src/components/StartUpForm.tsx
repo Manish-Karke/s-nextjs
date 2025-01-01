@@ -1,40 +1,83 @@
 "use client";
-import React, { useState } from "react";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+
+import React, { useState, useActionState } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import MDEditor from "@uiw/react-md-editor";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
+import { formSchema } from "@/lib/validation";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { createPitch } from "@/lib/action";
 
-const StartUpForm = () => {
-  const [title, setTitle] = useState("");
-  const [errors, setErrors] = useState({});
-  const [pitch, setPitch] = useState("**Set ur idea here**");
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const StartupForm = () => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pitch, setPitch] = useState("");
+  const { toast } = useToast();
+  const router = useRouter();
 
-    const newErrors = {};
-
-    if (!title.trim()) newErrors.title = "Title is required.";
-    if (!description.trim()) newErrors.description = "Description is required.";
-    if (!category.trim()) newErrors.category = "Category is required.";
-    if (!link.trim()) newErrors.link = "Image URL is required.";
-    if (!pitch.trim()) newErrors.pitch = "Pitch is required.";
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      console.log("Form submitted with:", {
-        title,
-        description,
-        category,
-        link,
+  const handleFormSubmit = async (prevState: any, formData: FormData) => {
+    try {
+      const formValues = {
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        category: formData.get("category") as string,
+        link: formData.get("link") as string,
         pitch,
+      };
+
+      await formSchema.parseAsync(formValues);
+
+      const result = await createPitch(prevState, formData, pitch);
+
+      if (result.status == "SUCCESS") {
+        toast({
+          title: "Success",
+          description: "Your startup pitch has been created successfully",
+        });
+
+        router.push(`/startup/${result._id}`);
+      }
+
+      return result;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErorrs = error.flatten().fieldErrors;
+
+        setErrors(fieldErorrs as unknown as Record<string, string>);
+
+        toast({
+          title: "Error",
+          description: "Please check your inputs and try again",
+          variant: "destructive",
+        });
+
+        return { ...prevState, error: "Validation failed", status: "ERROR" };
+      }
+
+      toast({
+        title: "Error",
+        description: "An unexpected error has occurred",
+        variant: "destructive",
       });
-      // Perform form submission logic here
+
+      return {
+        ...prevState,
+        error: "An unexpected error has occurred",
+        status: "ERROR",
+      };
     }
   };
 
+  const [state, formAction, isPending] = useActionState(handleFormSubmit, {
+    error: "",
+    status: "INITIAL",
+  });
+
   return (
-    <form onSubmit={handleSubmit} className="startup-form">
+    <form action={formAction} className="startup-form">
       <div>
         <label htmlFor="title" className="startup-form_label">
           Title
@@ -43,11 +86,10 @@ const StartUpForm = () => {
           id="title"
           name="title"
           className="startup-form_input"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
           required
           placeholder="Startup Title"
         />
+
         {errors.title && <p className="startup-form_error">{errors.title}</p>}
       </div>
 
@@ -56,12 +98,13 @@ const StartUpForm = () => {
           Description
         </label>
         <Textarea
-          id="Description"
-          name="Description"
+          id="description"
+          name="description"
           className="startup-form_textarea"
           required
           placeholder="Startup Description"
         />
+
         {errors.description && (
           <p className="startup-form_error">{errors.description}</p>
         )}
@@ -76,8 +119,9 @@ const StartUpForm = () => {
           name="category"
           className="startup-form_input"
           required
-          placeholder="Startup category(ai, ml, web, mobile)"
+          placeholder="Startup Category (Tech, Health, Education...)"
         />
+
         {errors.category && (
           <p className="startup-form_error">{errors.category}</p>
         )}
@@ -88,12 +132,13 @@ const StartUpForm = () => {
           Image URL
         </label>
         <Input
-          id="LINK"
-          name="LINK"
+          id="link"
+          name="link"
           className="startup-form_input"
           required
-          placeholder="Startup image URL"
+          placeholder="Startup Image URL"
         />
+
         {errors.link && <p className="startup-form_error">{errors.link}</p>}
       </div>
 
@@ -101,36 +146,36 @@ const StartUpForm = () => {
         <label htmlFor="pitch" className="startup-form_label">
           Pitch
         </label>
+
         <MDEditor
           value={pitch}
           onChange={(value) => setPitch(value as string)}
           id="pitch"
           preview="edit"
           height={300}
-          style={{ borderRadius: "20px solid #ccc", overflow: "hidden" }}
+          style={{ borderRadius: 20, overflow: "hidden" }}
           textareaProps={{
-            placeholder: "Write your pitch here",
+            placeholder:
+              "Briefly describe your idea and what problem it solves",
           }}
           previewOptions={{
             disallowedElements: ["style"],
           }}
         />
+
         {errors.pitch && <p className="startup-form_error">{errors.pitch}</p>}
       </div>
 
-      <button type="submit" className="startup-form_button">
-        Submit
-      </button>
-      <style jsx>{`
-        .startup-form {
-          max-width: 400px;
-          margin: auto;
-          padding: 20px;
-          border: 1px solid #ccc;
-        }
-      `}</style>
+      <Button
+        type="submit"
+        className="startup-form_btn text-white"
+        disabled={isPending}
+      >
+        {isPending ? "Submitting..." : "Submit Your Pitch"}
+        <Send className="size-6 ml-2" />
+      </Button>
     </form>
   );
 };
 
-export default StartUpForm;
+export default StartupForm;

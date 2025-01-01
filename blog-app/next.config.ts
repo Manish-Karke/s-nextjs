@@ -11,8 +11,9 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    ppr: false,
+    ppr: false, // Ensure this is correctly set based on your needs
   },
+
   devIndicators: {
     appIsrStatus: true,
     buildActivity: true,
